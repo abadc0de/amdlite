@@ -1,0 +1,52 @@
+#!/bin/bash
+
+appname="amdlite"
+testpath="../amdjs-tests"
+ccjarpath="../closure-compiler/compiler.jar"
+status=""
+
+# closure compiler
+
+minify() {
+    echo -e "\n================ minifying ================\n"
+    status="Minify failed."
+
+    java -jar "$ccjarpath" "$appname.js" \
+    --warning_level VERBOSE --summary_detail_level 3 \
+    --compilation_level ADVANCED_OPTIMIZATIONS  > "$appname.min.js"
+}
+
+# jshint
+
+lint() {
+    echo -e "\n================  linting  ================\n"
+    status="Lint failed."
+    
+    jshint --show-non-errors "$appname.js"
+}
+
+# amdjs-tests
+
+test() {
+    echo -e "\n================  testing  ================\n"
+    status="Test failed."
+    
+    node "$testpath/server/server.js" &
+    pid=$!
+    node "$testpath/server/server_wait.js"
+    node "test/client.js" "$appname"
+    kill $pid 
+}
+
+pass() {
+    echo -e "\n================  SUCCESS  ================\n"
+    echo -e "Build complete.\n"
+}
+
+fail() {
+    echo -e "\n================  FAILURE  ================\n"
+    echo -e "$status\n"
+}
+
+minify && lint && test && pass || fail
+
