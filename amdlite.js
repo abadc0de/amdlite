@@ -1,3 +1,4 @@
+/* jshint sub:true */
 (
 /** 
     amdlite.js
@@ -8,6 +9,9 @@
 function(global, undefined){
 
     'use strict';
+    
+    /** @const */
+    var E_REQUIRE_FAILED = 'malformed require';
     
     /** Modules waiting for dependencies to be exported.
     
@@ -54,11 +58,11 @@ function(global, undefined){
         this.id = id;
         this.dependencies = dependencies;
         this.factoryFunction = factory;
-        this.exports = {};
+        this['exports'] = {};
         this.generator = generator;
-        this.global = global;
+        this['global'] = global;
         if (!factory) {
-            this.exportValue = exportValue || this.exports;
+            this.exportValue = exportValue || this['exports'];
         }
     }
 
@@ -259,8 +263,8 @@ function(global, undefined){
                         id = module.dependencies[j];
                         args.unshift(module.getDependencyValue(id));
                     }
-                    value = factory.apply(module.exports, args);
-                    module.exportValue = value || module.exports;
+                    value = factory.apply(module['exports'], args);
+                    module.exportValue = value || module['exports'];
                     ++count;
                 }
             }
@@ -287,7 +291,7 @@ function(global, undefined){
         } else if (typeof dependencies == 'string') {
             return getCached(dependencies).exportValue;
         } else {
-            throw new Error('malformed require');
+            throw new Error(E_REQUIRE_FAILED);
         }
     }
     
@@ -302,14 +306,14 @@ function(global, undefined){
         function r() {
             return require.apply(global, arguments);
         }
-        r.toUrl = function(path) {
+        r['toUrl'] = function(path) {
             return module.id + '/' + path;
         };
         return r;
     });
     
     dynamic('exports', function (module) {
-        return module.exports;
+        return module['exports'];
     });
     
     dynamic('module', function (module) {
@@ -317,7 +321,6 @@ function(global, undefined){
     });
     
     // Exports, closure compiler style
-    /* jshint sub:true */
     
     global['define'] = define;
     global['define']['amd'] = { 'lite': {
