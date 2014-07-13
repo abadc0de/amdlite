@@ -56,6 +56,7 @@ function(global, undefined){
         this.factoryFunction = factory;
         this.exports = {};
         this.generator = generator;
+        this.global = global;
         if (!factory) {
             this.exportValue = exportValue || this.exports;
         }
@@ -258,7 +259,7 @@ function(global, undefined){
                         id = module.dependencies[j];
                         args.unshift(module.getDependencyValue(id));
                     }
-                    value = factory.apply(global, args);
+                    value = factory.apply(module.exports, args);
                     module.exportValue = value || module.exports;
                     ++count;
                 }
