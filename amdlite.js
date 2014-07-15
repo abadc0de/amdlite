@@ -64,6 +64,10 @@ function(global, undefined){
         if (!factory) {
             this.exportValue = exportValue || this['exports'];
         }
+        if (id) {
+            loads[id] = true;
+            cache[id] = this;
+        }
     }
 
     /** Load dependencies.
